@@ -10,17 +10,65 @@ export default function Home() {
   const [texto1, setTexto1] = useState("");
   const [texto2, setTexto2] = useState("");
   const [resultado, setResultado] = useState<any>(null);
-  const [similarity, setSimilarity] = useState("");
+  const [similarity, setSimilarity] = useState<any>(null);
+  const [elsResultados, setElsResultados] = useState<any[]>([]);
 
   async function analisar(texto: string) {
     const res = await fetch("/api/analyze", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ texto, saltoELS: 7 }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ texto }),
+    });
+
+    escanearELS(texto);
+    const data = await res.json();
+    setResultado(data);
+  }
+
+  async function calibrar(texto: string, tipo: "human" | "ia") {
+    await fetch("/api/calibrate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        texto,
+        tipo,
+      }),
+    });
+
+    alert("Texto usado para calibrar o modelo");
+  }
+
+  async function compararTextos(texto1: string, texto2: string) {
+    const res = await fetch("/api/compare", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        texto1,
+        texto2,
+      }),
+    });
+    const data = await res.json();
+    setSimilarity(data);
+  }
+
+  async function escanearELS(texto: string) {
+    const res = await fetch("/api/els-scan", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ texto }),
     });
 
     const data = await res.json();
-    setResultado(data);
+
+    setElsResultados(data);
   }
 
   function uploadArquivo(e: any, setTexto: any) {
@@ -123,24 +171,36 @@ export default function Home() {
                       <div
                         className="bg-indigo-500 h-4 rounded-full transition-all duration-500"
                         style={{
-                          width: `${resultado.probabilidadeIA}%`,
+                          width: `${resultado.metricas.probabilidadeIA}%`,
                         }}
                       />
                     </div>
 
                     <p className="text-2xl font-bold text-slate-500">
-                      {resultado.probabilidadeIA}%
+                      {resultado.metricas.probabilidadeIA}%
                     </p>
                   </div>
 
                   {/* METRICAS */}
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-[95%]">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-[95%]">
                     <div className="bg-slate-50 p-5 rounded-xl border border-slate-100 gap-2">
-                      <p className="text-base text-slate-500">Entropia</p>
+                      <p className="text-base text-slate-500">
+                        Entropia de Caracteres
+                      </p>
 
                       <p className="text-2xl font-semibold text-slate-700">
-                        {resultado.entropia.toFixed(4)}
+                        {resultado.metricas.entropiaCaracteres.toFixed(2)}
+                      </p>
+                    </div>
+
+                    <div className="bg-slate-50 p-5 rounded-xl border border-slate-100 gap-2">
+                      <p className="text-base text-slate-500">
+                        Entropia de Palavras
+                      </p>
+
+                      <p className="text-2xl font-semibold text-slate-700">
+                        {resultado.metricas.entropiaPalavras.toFixed(2)}
                       </p>
                     </div>
 
@@ -150,7 +210,7 @@ export default function Home() {
                       </p>
 
                       <p className="text-2xl font-semibold text-slate-700">
-                        {resultado.diversidadeLexica.toFixed(2)}
+                        {resultado.metricas.diversidadeLexica.toFixed(2)}
                       </p>
                     </div>
                   </div>
@@ -158,11 +218,45 @@ export default function Home() {
                   {/* ELS */}
 
                   <div className="bg-slate-50 p-5 rounded-xl border border-slate-100 w-[95%] gap-2">
-                    <p className="text-base text-slate-500 mb-1">Padrão ELS</p>
-
-                    <p className="text-slate-700 break-all text-sm bg-slate-100">
-                      {resultado.els}
+                    <p className="text-base text-slate-500 mb-4">
+                      ELS Detectados
                     </p>
+
+                    {elsResultados.length > 0 && (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                        {elsResultados.map((r, i) => (
+                          <div
+                            key={i}
+                            style={{ marginTop: "10px" }}
+                            className="p-4 mt-4"
+                          >
+                            <div className="flex gap-2 pb-2 text-slate-700">
+                              <span>
+                                <b>Salto:</b> {r.salto}
+                              </span>
+                              <span>
+                                <b>Tamanho:</b> {r.tamanho}
+                              </span>
+                            </div>
+
+                            <div
+                              className="bg-gray-200 text-slate-900 overflow-x-auto whitespace-pre-wrap min-h-25"
+                              style={{
+                                padding: "10px",
+                                marginTop: "10px",
+                                fontFamily: "monospace",
+                              }}
+                            >
+                              {r.texto}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/*<p className="text-slate-700 break-all text-sm bg-slate-100">
+                      {elsResultados}
+                    </p> */}
                   </div>
 
                   {/* GRAFICO */}
@@ -179,11 +273,13 @@ export default function Home() {
                           maintainAspectRatio: false,
                         }}
                         data={{
-                          labels: Object.keys(resultado.frequencia),
+                          labels: Object.keys(resultado.metricas.frequencia),
                           datasets: [
                             {
                               label: "Frequência",
-                              data: Object.values(resultado.frequencia),
+                              data: Object.values(
+                                resultado.metricas.frequencia
+                              ),
                               backgroundColor: "#6366f1",
                             },
                           ],
@@ -244,12 +340,13 @@ export default function Home() {
                 <button
                   onClick={() => {
                     if (!texto1 || !texto2) return;
+                    compararTextos(texto1, texto2);
 
-                    const similaridade =
-                      new Set(texto1.split(/\s+/)).size /
-                      new Set(texto2.split(/\s+/)).size;
+                    //const similaridade =
+                    // new Set(texto1.split(/\s+/)).size /
+                    // new Set(texto2.split(/\s+/)).size;
 
-                    setSimilarity(similaridade.toFixed(2));
+                    // setSimilarity(similaridade.toFixed(2));
                   }}
                   className="w-50 px-6 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition shadow-sm"
                 >
@@ -257,12 +354,25 @@ export default function Home() {
                 </button>
               </div>
 
-              <div className="h-15 w-full mt-4 mb-4 flex justify-center items-center">
+              <div className="w-full mb-4! flex justify-center items-center">
                 {similarity && (
-                  <div className="bg-emerald-100 h-10 p-4 rounded-xl w-[95%]">
-                    <p className="font-semibold text-2xl text-emerald-500 text-center">
-                      Similaridade dos textos: {similarity}
+                  <div
+                    className="p-4! rounded-xl w-[95%]"
+                    style={{ backgroundColor: `${similarity.cor}` }}
+                  >
+                    <p className="font-semibold text-2xl text-white text-center">
+                      Similaridade dos textos: {similarity.score.toFixed(2)} -{" "}
+                      {similarity.nivel}
                     </p>
+                    <p className="font-semibold text-xl text-white text-center">
+                      {similarity.descricao}
+                    </p>
+                    {similarity.palavrasComuns.length > 0 && (
+                      <span className="text-sm text-white block mt-3! text-center">
+                        Palavras em comum:{" "}
+                        {similarity.palavrasComuns.join(", ")}
+                      </span>
+                    )}
                   </div>
                 )}
               </div>

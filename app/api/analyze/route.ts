@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
-import { analisarTexto, els } from "@/lib/analyzer";
+import { extrairMetricas } from "@/lib/analyzer";
+import { classificar } from "@/lib/calibrator";
 
 export async function POST(req: Request) {
-  const body = await req.json();
-  const { texto, saltoELS } = body;
+  const { texto } = await req.json();
 
-  const analise = analisarTexto(texto);
-  const resultadoELS = els(texto, saltoELS || 7);
+  const metricas = extrairMetricas(texto);
+  const probIA = classificar(metricas);
 
   return NextResponse.json({
-    ...analise,
-    els: resultadoELS.slice(0, 300),
+    metricas,
+    probabilidadeIA: probIA,
   });
 }
