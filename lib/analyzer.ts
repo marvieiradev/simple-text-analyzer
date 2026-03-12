@@ -1,26 +1,18 @@
-export function analisarTexto(texto: string) {
+export function extrairMetricas(texto: string) {
   const palavras = texto.trim().split(/\s+/);
   const frases = texto.split(/[.!?]+/).filter((f) => f.trim().length > 0);
 
   const totalPalavras = palavras.length;
   const totalFrases = frases.length;
 
-  const mediaFrase = totalPalavras / (totalFrases || 1);
-
-  const diversidadeLexica =
-    new Set(palavras.map((p) => p.toLowerCase())).size / totalPalavras;
-
   const entropiaCaracteres = entropia(texto);
   const entropiaPalavras = entropiaPalavrasCalc(palavras);
-  const entropiaValor = entropia(texto);
-
+  const mediaFrase = totalPalavras / (totalFrases || 1);
+  const diversidadeLexica =
+    new Set(palavras.map((p) => p.toLowerCase())).size / totalPalavras;
   const varianciaFrases = variancia(
     frases.map((f) => f.trim().split(/\s+/).length)
   );
-
-  const mediaTamanhoPalavra =
-    palavras.reduce((a, b) => a + b.length, 0) / totalPalavras;
-
   const taxaPalavrasLongas =
     palavras.filter((p) => p.length > 10).length / totalPalavras;
 
@@ -48,18 +40,14 @@ export function analisarTexto(texto: string) {
   if (scoreIA > 100) scoreIA = 100;
 
   return {
-    totalPalavras,
-    totalFrases,
-    mediaFrase,
-    diversidadeLexica,
-    entropiaCaracteres,
-    entropiaPalavras,
-    varianciaFrases,
-    mediaTamanhoPalavra,
-    taxaPalavrasLongas,
-    entropia: entropiaValor,
+    mediaFrase: totalPalavras / (totalFrases || 1),
+    diversidadeLexica: diversidadeLexica,
+    entropiaCaracteres: entropia(texto),
+    entropiaPalavras: entropiaPalavrasCalc(palavras),
+    varianciaFrases: variancia(frases.map((f) => f.trim().split(/\s+/).length)),
     probabilidadeIA: scoreIA,
     frequencia: frequenciaLetras(texto),
+    els: els(texto, Number(scoreIA * 100)),
   };
 }
 
@@ -111,7 +99,6 @@ export function els(texto: string, salto: number) {
   for (let i = 0; i < limpo.length; i += salto) {
     resultado += limpo[i];
   }
-
   return resultado;
 }
 
