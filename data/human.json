@@ -1,0 +1,16 @@
+[
+  {
+    "mediaFrase": 18.2,
+    "diversidadeLexica": 0.71,
+    "entropiaCaracteres": 4.1,
+    "entropiaPalavras": 7.2,
+    "varianciaFrases": 34
+  },
+  {
+    "mediaFrase": 10.17741935483871,
+    "diversidadeLexica": 0.14961507864422494,
+    "entropiaCaracteres": 4.357562391642427,
+    "entropiaPalavras": 10.411846483482519,
+    "varianciaFrases": 113.38147038669332
+  }
+]
