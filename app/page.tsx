@@ -12,6 +12,39 @@ export default function Home() {
   const [resultado, setResultado] = useState<any>(null);
   const [similarity, setSimilarity] = useState<any>(null);
   const [elsResultados, setElsResultados] = useState<any[]>([]);
+  const [color, setColor] = useState({
+    bg: "bg-gray-100",
+    text: "text-gray-700",
+    bar: "bg-gray-700",
+  });
+
+  const colorMap: any = {
+    blue: {
+      bg: "bg-blue-100",
+      text: "text-blue-600",
+      bar: "bg-blue-500",
+    },
+    green: {
+      bg: "bg-green-100",
+      text: "text-green-600",
+      bar: "bg-green-500",
+    },
+    yellow: {
+      bg: "bg-yellow-100",
+      text: "text-yellow-600",
+      bar: "bg-yellow-500",
+    },
+    orange: {
+      bg: "bg-orange-100",
+      text: "text-orange-600",
+      bar: "bg-orange-500",
+    },
+    red: {
+      bg: "bg-red-100",
+      text: "text-red-600",
+      bar: "bg-red-500",
+    },
+  };
 
   async function analisar(texto: string) {
     const res = await fetch("/api/analyze", {
@@ -55,6 +88,14 @@ export default function Home() {
     });
     const data = await res.json();
     setSimilarity(data);
+    setColor(
+      colorMap[data?.cor] || {
+        bg: "bg-gray-100",
+        text: "text-gray-700",
+        bar: "bg-gray-700",
+      }
+    );
+    window.scrollTo(0, document.body.scrollHeight);
   }
 
   async function escanearELS(texto: string) {
@@ -126,7 +167,7 @@ export default function Home() {
         {/* ANALISE */}
         <div className="flex flex-col w-full py-10 p-10 container">
           {tab === "analise" && (
-            <div className="w-full bg-white p-8 rounded-2xl shadow-lg border border-slate-100 flex flex-col gap-6 overflow-hidden py-6">
+            <div className="w-full bg-white p-8 rounded-2xl shadow-lg border border-slate-100 flex flex-col overflow-hidden py-6">
               <textarea
                 className="border-2 border-slate-300 rounded-xl min-h-40 focus:ring-2 focus:ring-indigo-400 outline-none p-4"
                 placeholder="Cole ou escreva um texto para análise..."
@@ -295,7 +336,7 @@ export default function Home() {
           {/* COMPARAÇÃO */}
 
           {tab === "comparacao" && (
-            <div className="w-full bg-white p-8 rounded-2xl shadow-lg border border-slate-100 flex flex-col gap-6 overflow-hidden">
+            <div className="w-full bg-white p-8 rounded-2xl shadow-lg border border-slate-100 flex flex-col overflow-hidden">
               <textarea
                 className="border-2 border-slate-300 rounded-xl p-4 min-h-40"
                 placeholder="Texto 1"
@@ -336,7 +377,7 @@ export default function Home() {
                 onChange={(e) => uploadArquivo(e, setTexto2)}
               />
 
-              <div className="w-full flex justify-center items-center">
+              <div className="w-full flex justify-center items-center mb-4!">
                 <button
                   onClick={() => {
                     if (!texto1 || !texto2) return;
@@ -357,20 +398,34 @@ export default function Home() {
               <div className="w-full mb-4! flex justify-center items-center">
                 {similarity && (
                   <div
-                    className="p-4! rounded-xl w-[95%]"
-                    style={{ backgroundColor: `${similarity.cor}` }}
+                    className={`p-4! rounded-xl ${color.text} ${color.bg} w-[95%]`}
                   >
-                    <p className="font-semibold text-2xl text-white text-center">
-                      Similaridade dos textos: {similarity.score.toFixed(2)} -{" "}
+                    <p className="font-semibold text-2xl text-center mb-2!">
+                      Similaridade dos textos:{" "}
+                      {`${similarity.score.toFixed(0)}%`}
+                    </p>
+                    <div
+                      className={`bg-slate-300 rounded-full h-4 overflow-hidden mb-2!`}
+                    >
+                      <div
+                        className={`${color.bar} h-4 rounded-full transition-all duration-500`}
+                        style={{
+                          width: `${similarity.score}%`,
+                        }}
+                      />
+                    </div>
+                    <p className="font-semibold text-2xl text-center">
                       {similarity.nivel}
                     </p>
-                    <p className="font-semibold text-xl text-white text-center">
+                    <p className="font-semibold text-xl text-center">
                       {similarity.descricao}
                     </p>
                     {similarity.palavrasComuns.length > 0 && (
-                      <span className="text-sm text-white block mt-3! text-center">
+                      <span className="text-sm block mt-3! text-center">
                         Palavras em comum:{" "}
-                        {similarity.palavrasComuns.join(", ")}
+                        <span className="font-semibold">
+                          {similarity.palavrasComuns.join(", ")}
+                        </span>
                       </span>
                     )}
                   </div>

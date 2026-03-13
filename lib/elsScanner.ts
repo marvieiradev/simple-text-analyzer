@@ -1,3 +1,5 @@
+import { stopwords } from "./stopworks";
+
 export function limparTexto(texto: string) {
   return texto
     .toLowerCase()
@@ -58,7 +60,10 @@ function scoreSequencia(seq: string[]) {
 export function scannerELS(texto: string) {
   const clean = limparTexto(texto);
 
-  let palavras = clean.split(" ");
+  let palavras = clean
+    .split(" ")
+    .filter((p) => p.length > 2)
+    .filter((p) => !stopwords.has(p));
 
   if (palavras.length > 20000) {
     palavras = palavras.slice(0, 20000);

@@ -1,9 +1,12 @@
+import { stopwords } from "./stopworks";
+
 export function limparTexto(texto: string) {
   return texto
     .toLowerCase()
     .replace(/[^\p{L}\s]/gu, "")
     .split(/\s+/)
-    .filter((p) => p.length > 2);
+    .filter((p) => p.length > 2)
+    .filter((p) => !stopwords.has(p));
 }
 
 export function similaridadeJaccard(a: string[], b: string[]) {
@@ -15,13 +18,13 @@ export function similaridadeJaccard(a: string[], b: string[]) {
   const uniao = new Set([...setA, ...setB]);
 
   return {
-    score: intersecao.length / uniao.size,
+    score: Math.round((intersecao.length / uniao.size) * 100),
     palavrasComuns: intersecao,
   };
 }
 
 export function interpretar(score: number) {
-  if (score < 0.2) {
+  if (score < 20) {
     return {
       nivel: "Muito diferente",
       cor: "blue",
@@ -29,15 +32,16 @@ export function interpretar(score: number) {
     };
   }
 
-  if (score < 0.4) {
+  if (score < 40) {
     return {
       nivel: "Pouca semelhança",
       cor: "green",
-      descricao: "Algumas palavras coincidem, mas o conteúdo parece diferente.",
+      descricao:
+        "Algumas palavras coincidem, mas os textos parecem tratar de conteúdos diferentes.",
     };
   }
 
-  if (score < 0.6) {
+  if (score < 60) {
     return {
       nivel: "Semelhança moderada",
       cor: "yellow",
@@ -45,11 +49,11 @@ export function interpretar(score: number) {
     };
   }
 
-  if (score < 0.8) {
+  if (score < 80) {
     return {
       nivel: "Alta semelhança",
       cor: "orange",
-      descricao: "Os textos compartilham muitas palavras e estruturas.",
+      descricao: "Os textos compartilham muitas palavras ou estruturas.",
     };
   }
 
