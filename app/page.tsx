@@ -9,6 +9,8 @@ export default function Home() {
   const [tab, setTab] = useState("analise");
   const [texto1, setTexto1] = useState("");
   const [texto2, setTexto2] = useState("");
+  const [fileName1, setFileName1] = useState("");
+  const [fileName2, setFileName2] = useState("");
   const [resultado, setResultado] = useState<any>(null);
   const [similarity, setSimilarity] = useState<any>(null);
   const [elsResultados, setElsResultados] = useState<any[]>([]);
@@ -112,9 +114,12 @@ export default function Home() {
     setElsResultados(data);
   }
 
-  function uploadArquivo(e: any, setTexto: any) {
+  function uploadArquivo(e: any, setTexto: any, fileNameState: string) {
     const file = e.target.files[0];
     const reader = new FileReader();
+
+    if (fileNameState === "fileName1") setFileName1(file.name);
+    else setFileName2(file.name);
 
     reader.onload = (event: any) => {
       setTexto(event.target.result);
@@ -124,22 +129,22 @@ export default function Home() {
   }
 
   return (
-    <div className="w-full max-w-225 mx-auto px-6 flex flex-col gap-10">
+    <div className="w-full max-w-225 mx-auto px-6 flex flex-col gap-8">
       {/* CONTAINER */}
 
       <div className="max-w-5xl mx-auto flex flex-col gap-10">
         {/* HEADER */}
-        <header className="text-center space-y-2">
-          <h1 className="text-4xl font-bold text-slate-800">
+        <header className="flex flex-col text-center space-y-2 mt-4! bg-indigo-500 p-1! rounded-xl gap-2!">
+          <h1 className="text-4xl font-bold text-white">
             Laboratório de Análise Textual
           </h1>
 
-          <p className="text-slate-500">
+          <p className="text-slate-50 mb-2!">
             Detector experimental de padrões e probabilidade de IA
           </p>
         </header>
         {/* TABS */}
-        <div className="flex justify-center">
+        <div className="flex justify-center mt-2!">
           <div className="bg-white shadow-sm rounded-xl p-1 flex gap-1">
             <button
               onClick={() => setTab("analise")}
@@ -169,16 +174,16 @@ export default function Home() {
           {tab === "analise" && (
             <div className="w-full bg-white p-8 rounded-2xl shadow-lg border border-slate-100 flex flex-col overflow-hidden py-6">
               <textarea
-                className="border-2 border-slate-300 rounded-xl min-h-40 focus:ring-2 focus:ring-indigo-400 outline-none p-4"
+                className="border-2 border-slate-300 rounded-xl min-h-40 focus:ring-2 focus:ring-indigo-400 outline-none p-4 mt-6!"
                 placeholder="Cole ou escreva um texto para análise..."
                 value={texto1}
                 onChange={(e) => setTexto1(e.target.value)}
               />
 
-              <div className="flex flex-wrap gap-4 items-center">
+              <div className="flex items-center gap-3 mb-4! px-2!">
                 <label
                   htmlFor="text"
-                  className="text-base rounded-full text-white bg-emerald-400"
+                  className="text-sm font-semibold rounded-full text-white bg-emerald-400"
                 >
                   <ArrowBigUp />
                   Selecionar Arquivo
@@ -187,13 +192,18 @@ export default function Home() {
                 <input
                   type="file"
                   id="text"
-                  onChange={(e) => uploadArquivo(e, setTexto1)}
+                  onChange={(e) => uploadArquivo(e, setTexto1, "fileName1")}
                   className="text-sm"
                 />
+                <span className="text-md text-slate-500 font-semibold">
+                  {texto1 ? fileName1 : ""}
+                </span>
+              </div>
 
+              <div className="flex justify-center items-center">
                 <button
                   onClick={() => analisar(texto1)}
-                  className="ml-auto px-6 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition shadow-sm"
+                  className="ml-auto w-50 px-6 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition shadow-sm"
                 >
                   Analisar Texto
                 </button>
@@ -294,10 +304,6 @@ export default function Home() {
                         ))}
                       </div>
                     )}
-
-                    {/*<p className="text-slate-700 break-all text-sm bg-slate-100">
-                      {elsResultados}
-                    </p> */}
                   </div>
 
                   {/* GRAFICO */}
@@ -344,18 +350,23 @@ export default function Home() {
                 onChange={(e) => setTexto1(e.target.value)}
               />
 
-              <label
-                htmlFor="text1"
-                className="text-base rounded-full text-white bg-emerald-400"
-              >
-                <ArrowBigUp />
-                Selecionar Arquivo
-              </label>
-              <input
-                type="file"
-                id="text1"
-                onChange={(e) => uploadArquivo(e, setTexto1)}
-              />
+              <div className="flex items-center gap-4 mb-4! px-2!">
+                <label
+                  htmlFor="text1"
+                  className="text-sm font-semibold rounded-full text-white bg-emerald-400"
+                >
+                  <ArrowBigUp />
+                  Selecionar Arquivo
+                </label>
+                <input
+                  type="file"
+                  id="text1"
+                  onChange={(e) => uploadArquivo(e, setTexto1, "fileName1")}
+                />
+                <span className="text-md text-slate-500 font-semibold">
+                  {texto1 ? fileName1 : ""}
+                </span>
+              </div>
 
               <textarea
                 className="border-2 border-slate-300 rounded-xl p-4 min-h-40"
@@ -364,30 +375,29 @@ export default function Home() {
                 onChange={(e) => setTexto2(e.target.value)}
               />
 
-              <label
-                htmlFor="text2"
-                className="text-base rounded-full text-white bg-emerald-400"
-              >
-                <ArrowBigUp />
-                Selecionar Arquivo
-              </label>
-              <input
-                type="file"
-                id="text2"
-                onChange={(e) => uploadArquivo(e, setTexto2)}
-              />
+              <div className="flex items-center gap-4">
+                <label
+                  htmlFor="text2"
+                  className="text-sm font-semibold rounded-full text-white bg-emerald-400"
+                >
+                  <ArrowBigUp />
+                  Selecionar Arquivo
+                </label>
+                <input
+                  type="file"
+                  id="text2"
+                  onChange={(e) => uploadArquivo(e, setTexto2, "fileName2")}
+                />
+                <span className="text-md text-slate-500 font-semibold">
+                  {texto2 ? fileName2 : ""}
+                </span>
+              </div>
 
               <div className="w-full flex justify-center items-center mb-4!">
                 <button
                   onClick={() => {
                     if (!texto1 || !texto2) return;
                     compararTextos(texto1, texto2);
-
-                    //const similaridade =
-                    // new Set(texto1.split(/\s+/)).size /
-                    // new Set(texto2.split(/\s+/)).size;
-
-                    // setSimilarity(similaridade.toFixed(2));
                   }}
                   className="w-50 px-6 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition shadow-sm"
                 >
