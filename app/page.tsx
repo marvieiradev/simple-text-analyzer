@@ -59,6 +59,12 @@ export default function Home() {
 
     escanearELS(texto);
     const data = await res.json();
+
+    if (data?.metricas.warning) {
+      alert(data.metricas.aviso);
+      return;
+    }
+
     setResultado(data);
   }
 
@@ -228,7 +234,7 @@ export default function Home() {
                     </div>
 
                     <p className="text-2xl font-bold text-slate-500">
-                      {resultado.metricas.probabilidadeIA}%
+                      {resultado.metricas.probabilidadeIA.toFixed(1)}%
                     </p>
                   </div>
 
@@ -241,7 +247,9 @@ export default function Home() {
                       </p>
 
                       <p className="text-2xl font-semibold text-slate-700">
-                        {resultado.metricas.entropiaCaracteres.toFixed(2)}
+                        {Number(
+                          resultado.metricas.entropiaCaracteres.toFixed(2)
+                        )}
                       </p>
                     </div>
 
@@ -251,7 +259,7 @@ export default function Home() {
                       </p>
 
                       <p className="text-2xl font-semibold text-slate-700">
-                        {resultado.metricas.entropiaPalavras.toFixed(2)}
+                        {Number(resultado.metricas.entropiaPalavras.toFixed(2))}
                       </p>
                     </div>
 
@@ -261,7 +269,9 @@ export default function Home() {
                       </p>
 
                       <p className="text-2xl font-semibold text-slate-700">
-                        {resultado.metricas.diversidadeLexica.toFixed(2)}
+                        {Number(
+                          resultado.metricas.diversidadeLexica.toFixed(2)
+                        )}
                       </p>
                     </div>
                   </div>
