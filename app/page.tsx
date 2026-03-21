@@ -60,11 +60,12 @@ export default function Home() {
     escanearELS(texto);
     const data = await res.json();
 
-    if (data?.metricas.warning) {
+    if (data?.metricas.probabilidadeIA === -1) {
       alert(data.metricas.aviso);
       return;
     }
 
+    console.log("Confiança:", data.metricas.frequencia);
     setResultado(data);
   }
 
@@ -219,22 +220,19 @@ export default function Home() {
                 <div className="flex flex-col gap-8 pt-4 items-center">
                   {/* PROBABILIDADE IA */}
 
-                  <div className="space-y-2 w-[95%] justify-center">
-                    <p className="font-semibold text-slate-700">
-                      Probabilidade de IA
-                    </p>
-
+                  <div className="space-y-2 w-[95%] justify-center mt-8!">
                     <div className="bg-slate-200 rounded-full h-4 overflow-hidden">
                       <div
-                        className="bg-indigo-500 h-4 rounded-full transition-all duration-500"
+                        className={`bg-${resultado.metricas.visual.color}-500 h-4 rounded-full transition-all duration-500`}
                         style={{
                           width: `${resultado.metricas.probabilidadeIA}%`,
                         }}
                       />
                     </div>
 
-                    <p className="text-2xl font-bold text-slate-500">
-                      {resultado.metricas.probabilidadeIA.toFixed(1)}%
+                    <p className="text-2xl font-bold text-slate-500 text-center mt-2!">
+                      {resultado.metricas.probabilidadeIA.toFixed(1)}% -{" "}
+                      {resultado.metricas.visual.phase}
                     </p>
                   </div>
 
@@ -320,7 +318,7 @@ export default function Home() {
 
                   <div className="bg-white border border-slate-100 p-6 rounded-xl w-[95%]">
                     <h4 className="font-semibold text-slate-700 mb-4">
-                      Frequência de Letras
+                      Frequência de Palavras
                     </h4>
 
                     <div className="w-full h-75 overflow-hidden">
