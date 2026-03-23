@@ -6,6 +6,7 @@ import "chart.js/auto";
 import { ArrowBigUp } from "lucide-react";
 
 export default function Home() {
+  const textLimit = 500000;
   const [tab, setTab] = useState("analise");
   const [texto1, setTexto1] = useState("");
   const [texto2, setTexto2] = useState("");
@@ -59,13 +60,6 @@ export default function Home() {
 
     escanearELS(texto);
     const data = await res.json();
-
-    if (data?.metricas.probabilidadeIA === -1) {
-      alert(data.metricas.aviso);
-      return;
-    }
-
-    console.log("Confiança:", data.metricas.frequencia);
     setResultado(data);
   }
 
@@ -129,7 +123,9 @@ export default function Home() {
     else setFileName2(file.name);
 
     reader.onload = (event: any) => {
-      setTexto(event.target.result);
+      const text = event.target.result;
+      const limitedText = text.slice(0, textLimit);
+      setTexto(limitedText);
     };
 
     reader.readAsText(file);
@@ -139,9 +135,9 @@ export default function Home() {
     <div className="w-full max-w-225 mx-auto px-6 flex flex-col gap-8">
       {/* CONTAINER */}
 
-      <div className="max-w-5xl mx-auto flex flex-col gap-10">
+      <div className="max-w-5xl mx-auto flex flex-col gap-8!">
         {/* HEADER */}
-        <header className="flex flex-col text-center space-y-2 mt-4! bg-indigo-500 p-1! rounded-xl gap-2!">
+        <header className="flex flex-col text-center space-y-2 mt-3! bg-indigo-500 p-1! rounded-xl gap-2!">
           <h1 className="text-4xl font-bold text-white">
             Laboratório de Análise Textual
           </h1>
@@ -182,166 +178,203 @@ export default function Home() {
             <div className="w-full bg-white p-8 rounded-2xl shadow-lg border border-slate-100 flex flex-col overflow-hidden py-6">
               <textarea
                 className="border-2 border-slate-300 rounded-xl min-h-40 focus:ring-2 focus:ring-indigo-400 outline-none p-4 mt-6!"
-                placeholder="Cole ou escreva um texto para análise..."
+                placeholder="Cole, escreva ou carregue um texto para análise (max 500.000 caracteres)"
                 value={texto1}
+                maxLength={textLimit}
                 onChange={(e) => setTexto1(e.target.value)}
               />
 
-              <div className="flex items-center gap-3 mb-4! px-2!">
-                <label
-                  htmlFor="text"
-                  className="text-sm font-semibold rounded-full text-white bg-emerald-400"
-                >
-                  <ArrowBigUp />
-                  Selecionar Arquivo
-                </label>
+              <div className="flex justify-between mb-4! px-2!">
+                <div className="flex items-center gap-3">
+                  <label
+                    htmlFor="text"
+                    className="text-sm font-semibold rounded-full text-white bg-emerald-400"
+                  >
+                    <ArrowBigUp />
+                    Selecionar Texto
+                  </label>
 
-                <input
-                  type="file"
-                  id="text"
-                  onChange={(e) => uploadArquivo(e, setTexto1, "fileName1")}
-                  className="text-sm"
-                />
-                <span className="text-md text-slate-500 font-semibold">
-                  {texto1 ? fileName1 : ""}
-                </span>
+                  <input
+                    type="file"
+                    id="text"
+                    accept=".txt"
+                    onChange={(e) => uploadArquivo(e, setTexto1, "fileName1")}
+                    className="text-sm"
+                  />
+                  <span className="text-md text-slate-500 font-semibold">
+                    {texto1 ? fileName1 : ""}
+                  </span>
+                </div>
+                <p className="text-slate-500 -mt-2!">
+                  {texto1.length}/{textLimit}
+                </p>
               </div>
 
               <div className="flex justify-center items-center">
                 <button
                   onClick={() => analisar(texto1)}
-                  className="ml-auto w-50 px-6 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition shadow-sm"
+                  className={`ml-auto w-50 px-6 py-2 bg-indigo-500 text-white rounded-lg transition shadow-sm ${
+                    texto1.length === 0 ? "cursor-not-allowed! opacity-50!" : ""
+                  }`}
+                  disabled={texto1.length === 0}
                 >
                   Analisar Texto
                 </button>
               </div>
 
               {resultado && (
-                <div className="flex flex-col gap-8 pt-4 items-center">
+                <div className="flex flex-col gap-8 pt-4! items-center">
                   {/* PROBABILIDADE IA */}
 
-                  <div className="space-y-2 w-[95%] justify-center mt-8!">
+                  <div className="space-y-2 w-[95%] justify-center mb-8!">
+                    <p className="text-xl font-bold text-slate-500 text-center mb-4!">
+                      Resultado:{" "}
+                      <span
+                        className={
+                          resultado.metricas.status === "ok"
+                            ? ""
+                            : "text-red-400"
+                        }
+                      >
+                        {resultado.metricas.visual.phase}
+                      </span>
+                    </p>
+
                     <div className="bg-slate-200 rounded-full h-4 overflow-hidden">
                       <div
                         className={`bg-${resultado.metricas.visual.color}-500 h-4 rounded-full transition-all duration-500`}
                         style={{
-                          width: `${resultado.metricas.probabilidadeIA}%`,
+                          width: `${
+                            resultado.metricas.status === "ok"
+                              ? resultado.metricas.probabilidadeIA
+                              : 0
+                          }%`,
                         }}
                       />
                     </div>
 
                     <p className="text-2xl font-bold text-slate-500 text-center mt-2!">
-                      {resultado.metricas.probabilidadeIA.toFixed(1)}% -{" "}
-                      {resultado.metricas.visual.phase}
+                      {resultado.metricas.status === "ok"
+                        ? resultado.metricas.probabilidadeIA.toFixed(1)
+                        : 0}
+                      % - IA / GPT
                     </p>
                   </div>
 
                   {/* METRICAS */}
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-[95%]">
-                    <div className="bg-slate-50 p-5 rounded-xl border border-slate-100 gap-2">
-                      <p className="text-base text-slate-500">
-                        Entropia de Caracteres
-                      </p>
+                  {resultado.metricas.status === "ok" && (
+                    <>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-[95%]">
+                        <div className="bg-slate-50 p-5 rounded-xl border border-slate-100 gap-2">
+                          <p className="text-base text-slate-500 font-semibold">
+                            Entropia de Caracteres
+                          </p>
 
-                      <p className="text-2xl font-semibold text-slate-700">
-                        {Number(
-                          resultado.metricas.entropiaCaracteres.toFixed(2)
-                        )}
-                      </p>
-                    </div>
+                          <p className="text-2xl font-bold text-slate-700">
+                            {Number(
+                              resultado.metricas.entropiaCaracteres.toFixed(2)
+                            )}
+                          </p>
+                        </div>
 
-                    <div className="bg-slate-50 p-5 rounded-xl border border-slate-100 gap-2">
-                      <p className="text-base text-slate-500">
-                        Entropia de Palavras
-                      </p>
+                        <div className="bg-slate-50 p-5 rounded-xl border border-slate-100 gap-2">
+                          <p className="text-base text-slate-500 font-semibold">
+                            Entropia de Palavras
+                          </p>
 
-                      <p className="text-2xl font-semibold text-slate-700">
-                        {Number(resultado.metricas.entropiaPalavras.toFixed(2))}
-                      </p>
-                    </div>
+                          <p className="text-2xl font-bold text-slate-700">
+                            {Number(
+                              resultado.metricas.entropiaPalavras.toFixed(2)
+                            )}
+                          </p>
+                        </div>
 
-                    <div className="bg-slate-50 p-5 rounded-xl border border-slate-100 gap-2">
-                      <p className="text-base text-slate-500">
-                        Diversidade Lexical
-                      </p>
+                        <div className="bg-slate-50 p-5 rounded-xl border border-slate-100 gap-2">
+                          <p className="text-base text-slate-500 font-semibold">
+                            Diversidade Lexical
+                          </p>
 
-                      <p className="text-2xl font-semibold text-slate-700">
-                        {Number(
-                          resultado.metricas.diversidadeLexica.toFixed(2)
-                        )}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* ELS */}
-
-                  <div className="bg-slate-50 p-5 rounded-xl border border-slate-100 w-[95%] gap-2">
-                    <p className="text-base text-slate-500 mb-4">
-                      ELS Detectados
-                    </p>
-
-                    {elsResultados.length > 0 && (
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                        {elsResultados.map((r, i) => (
-                          <div
-                            key={i}
-                            style={{ marginTop: "10px" }}
-                            className="p-4 mt-4"
-                          >
-                            <div className="flex gap-2 pb-2 text-slate-700">
-                              <span>
-                                <b>Salto:</b> {r.salto}
-                              </span>
-                              <span>
-                                <b>Tamanho:</b> {r.tamanho}
-                              </span>
-                            </div>
-
-                            <div
-                              className="bg-gray-200 text-slate-900 overflow-x-auto whitespace-pre-wrap min-h-25"
-                              style={{
-                                padding: "10px",
-                                marginTop: "10px",
-                                fontFamily: "monospace",
-                              }}
-                            >
-                              {r.texto}
-                            </div>
-                          </div>
-                        ))}
+                          <p className="text-2xl font-bold text-slate-700">
+                            {Number(
+                              resultado.metricas.diversidadeLexica.toFixed(2)
+                            )}
+                          </p>
+                        </div>
                       </div>
-                    )}
-                  </div>
 
-                  {/* GRAFICO */}
+                      {/* GRAFICO */}
 
-                  <div className="bg-white border border-slate-100 p-6 rounded-xl w-[95%]">
-                    <h4 className="font-semibold text-slate-700 mb-4">
-                      Frequência de Palavras
-                    </h4>
+                      <div className="bg-white border border-slate-100 p-6 rounded-xl w-[95%]">
+                        <h4 className="font-semibold text-slate-500 mb-4">
+                          Frequência de Palavras
+                        </h4>
 
-                    <div className="w-full h-75 overflow-hidden">
-                      <Bar
-                        options={{
-                          responsive: true,
-                          maintainAspectRatio: false,
-                        }}
-                        data={{
-                          labels: Object.keys(resultado.metricas.frequencia),
-                          datasets: [
-                            {
-                              label: "Frequência",
-                              data: Object.values(
+                        <div className="w-full h-75 overflow-hidden">
+                          <Bar
+                            options={{
+                              responsive: true,
+                              maintainAspectRatio: false,
+                            }}
+                            data={{
+                              labels: Object.keys(
                                 resultado.metricas.frequencia
                               ),
-                              backgroundColor: "#6366f1",
-                            },
-                          ],
-                        }}
-                      />
-                    </div>
-                  </div>
+                              datasets: [
+                                {
+                                  label: "Frequência",
+                                  data: Object.values(
+                                    resultado.metricas.frequencia
+                                  ),
+                                  backgroundColor: "#6366f1",
+                                },
+                              ],
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* ELS */}
+
+                      <div className="bg-slate-50 p-5 rounded-xl border border-slate-100 w-[95%] gap-2 mb-6!">
+                        <p className="text-base text-slate-500 mb-4 font-semibold">
+                          ELS Detectados
+                        </p>
+
+                        {elsResultados.length > 0 && (
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                            {elsResultados.map((r, i) => (
+                              <div
+                                key={i}
+                                style={{ marginTop: "10px" }}
+                                className="p-4 mt-4"
+                              >
+                                <div className="flex gap-2 pb-2 text-slate-700">
+                                  <span>
+                                    <b>Salto:</b> {r.salto}
+                                  </span>
+                                  <span>
+                                    <b>Tamanho:</b> {r.tamanho}
+                                  </span>
+                                </div>
+
+                                <div
+                                  className="bg-gray-200 text-slate-900 overflow-x-auto whitespace-pre-wrap min-h-25"
+                                  style={{
+                                    padding: "10px",
+                                    marginTop: "10px",
+                                    fontFamily: "monospace",
+                                  }}
+                                >
+                                  {r.texto}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -353,52 +386,66 @@ export default function Home() {
             <div className="w-full bg-white p-8 rounded-2xl shadow-lg border border-slate-100 flex flex-col overflow-hidden">
               <textarea
                 className="border-2 border-slate-300 rounded-xl p-4 min-h-40"
-                placeholder="Texto 1"
+                placeholder="Cole, escreva ou carregue um texto para análise (max 500.000 caracteres)"
                 value={texto1}
+                maxLength={textLimit}
                 onChange={(e) => setTexto1(e.target.value)}
               />
 
-              <div className="flex items-center gap-4 mb-4! px-2!">
-                <label
-                  htmlFor="text1"
-                  className="text-sm font-semibold rounded-full text-white bg-emerald-400"
-                >
-                  <ArrowBigUp />
-                  Selecionar Arquivo
-                </label>
-                <input
-                  type="file"
-                  id="text1"
-                  onChange={(e) => uploadArquivo(e, setTexto1, "fileName1")}
-                />
-                <span className="text-md text-slate-500 font-semibold">
-                  {texto1 ? fileName1 : ""}
-                </span>
+              <div className="flex justify-between mb-4! px-2!">
+                <div className="flex items-center gap-4 ">
+                  <label
+                    htmlFor="text1"
+                    className="text-sm font-semibold rounded-full text-white bg-emerald-400"
+                  >
+                    <ArrowBigUp />
+                    Selecionar Texto
+                  </label>
+                  <input
+                    type="file"
+                    id="text1"
+                    accept=".txt"
+                    onChange={(e) => uploadArquivo(e, setTexto1, "fileName1")}
+                  />
+                  <span className="text-md text-slate-500 font-semibold">
+                    {texto1 ? fileName1 : ""}
+                  </span>
+                </div>
+                <p className="text-slate-500 -mt-2!">
+                  {texto1.length}/{textLimit}
+                </p>
               </div>
 
               <textarea
                 className="border-2 border-slate-300 rounded-xl p-4 min-h-40"
-                placeholder="Texto 2"
+                placeholder="Cole, escreva ou carregue um texto para análise (max 500.000 caracteres)"
                 value={texto2}
+                maxLength={textLimit}
                 onChange={(e) => setTexto2(e.target.value)}
               />
 
-              <div className="flex items-center gap-4">
-                <label
-                  htmlFor="text2"
-                  className="text-sm font-semibold rounded-full text-white bg-emerald-400"
-                >
-                  <ArrowBigUp />
-                  Selecionar Arquivo
-                </label>
-                <input
-                  type="file"
-                  id="text2"
-                  onChange={(e) => uploadArquivo(e, setTexto2, "fileName2")}
-                />
-                <span className="text-md text-slate-500 font-semibold">
-                  {texto2 ? fileName2 : ""}
-                </span>
+              <div className="flex justify-between mb-4! px-2!">
+                <div className="flex items-center gap-4">
+                  <label
+                    htmlFor="text2"
+                    className="text-sm font-semibold rounded-full text-white bg-emerald-400"
+                  >
+                    <ArrowBigUp />
+                    Selecionar Texto
+                  </label>
+                  <input
+                    type="file"
+                    id="text2"
+                    accept=".txt"
+                    onChange={(e) => uploadArquivo(e, setTexto2, "fileName2")}
+                  />
+                  <span className="text-md text-slate-500 font-semibold">
+                    {texto2 ? fileName2 : ""}
+                  </span>
+                </div>
+                <p className="text-slate-500 -mt-2!">
+                  {texto2.length}/{textLimit}
+                </p>
               </div>
 
               <div className="w-full flex justify-center items-center mb-4!">
@@ -407,7 +454,10 @@ export default function Home() {
                     if (!texto1 || !texto2) return;
                     compararTextos(texto1, texto2);
                   }}
-                  className="w-50 px-6 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition shadow-sm"
+                  className={`w-50 px-6 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition shadow-sm ${
+                    !texto1 || !texto2 ? "cursor-not-allowed! opacity-50!" : ""
+                  }`}
+                  disabled={!texto1 || !texto2}
                 >
                   Comparar Textos
                 </button>
@@ -416,7 +466,7 @@ export default function Home() {
               <div className="w-full mb-4! flex justify-center items-center">
                 {similarity && (
                   <div
-                    className={`p-4! rounded-xl ${color.text} ${color.bg} w-[95%]`}
+                    className={`p-4! rounded-xl text-slate-700 bg-slate-100 w-[95%]`}
                   >
                     <p className="font-semibold text-2xl text-center mb-2!">
                       Similaridade dos textos:{" "}
@@ -432,7 +482,9 @@ export default function Home() {
                         }}
                       />
                     </div>
-                    <p className="font-semibold text-2xl text-center">
+                    <p
+                      className={`${color.text} font-semibold text-2xl text-center`}
+                    >
                       {similarity.nivel}
                     </p>
                     <p className="font-semibold text-xl text-center">

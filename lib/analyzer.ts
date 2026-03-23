@@ -7,12 +7,7 @@ export function extrairMetricas(texto: string) {
   const totalPalavras = palavras.length;
   const totalFrases = frases.length || 1;
 
-  if (totalPalavras < 30) {
-    return {
-      probabilidadeIA: -1,
-      aviso: "Texto muito curto para análise confiável",
-    };
-  }
+  const textoValido = totalPalavras < 30 ? false : true;
 
   const textoLower = texto.toLowerCase();
 
@@ -27,17 +22,18 @@ export function extrairMetricas(texto: string) {
   const repBigram = repeticaoNGrams(bigrams); // repetição estrutural
   const repTrigram = repeticaoNGrams(trigrams);
 
-  const entropiaCaracteres = entropia(texto);
-  const entropiaPalavras = entropiaPalavrasCalc(palavras);
+  const entropiaCaracteres = textoValido ? entropia(texto) : 0;
+  const entropiaPalavras = textoLower ? entropiaPalavrasCalc(palavras) : 0;
 
-  const mediaFrase = totalPalavras / totalFrases;
+  const mediaFrase = textoValido ? totalPalavras / totalFrases : 0;
 
-  const diversidadeLexica =
-    new Set(palavras.map((p) => p.toLowerCase())).size / totalPalavras;
+  const diversidadeLexica = textoValido
+    ? new Set(palavras.map((p) => p.toLowerCase())).size / totalPalavras
+    : 0;
 
-  const varianciaFrases = variancia(
-    frases.map((f) => f.trim().split(/\s+/).length)
-  );
+  const varianciaFrases = textoValido
+    ? variancia(frases.map((f) => f.trim().split(/\s+/).length))
+    : 0;
 
   const taxaPalavrasLongas =
     palavras.filter((p) => p.length > 10).length / totalPalavras;
@@ -216,6 +212,12 @@ export function extrairMetricas(texto: string) {
   if (totalPalavras > 1000) scoreFinal *= 0.9;
 
   scoreFinal = Math.max(0, Math.min(95, scoreFinal));
+  const probabilidadeIA = textoValido ? scoreFinal : 0;
+  const frequencia = textoValido ? frequenciaPalavras(texto) : {};
+  const scoreEls = textoValido
+    ? els(texto, Math.max(2, Math.floor(scoreIA / 2)))
+    : "";
+  const status = textoValido ? "ok" : "error";
 
   // CONFIANÇA
   let confianca = 0;
@@ -233,6 +235,11 @@ export function extrairMetricas(texto: string) {
     visual = { phase: "Indeterminado / Híbrido", color: "orange" };
   } else if (scoreFinal <= 40) {
     visual = { phase: "Provavelmente Humano", color: "green" };
+  } else if (status === "error") {
+    visual = {
+      phase: "Texto muito curto para análise confiável.",
+      color: "slate",
+    };
   }
 
   // DEBUG
@@ -253,15 +260,16 @@ export function extrairMetricas(texto: string) {
   // RETURN
 
   return {
+    status,
     mediaFrase,
     diversidadeLexica,
     entropiaCaracteres,
     entropiaPalavras,
     varianciaFrases,
-    probabilidadeIA: scoreFinal,
-    frequencia: frequenciaPalavras(texto),
-    els: els(texto, Math.max(2, Math.floor(scoreIA / 2))),
-    burstiness: burst,
+    probabilidadeIA,
+    frequencia,
+    els: scoreEls,
+    burst,
     confianca,
     visual,
   };
