@@ -1,4 +1,7 @@
+import { isNullOrUndef } from "chart.js/helpers";
 import { stopwords } from "./stopworks";
+
+let status = "";
 
 export function limparTexto(texto: string) {
   return texto
@@ -18,7 +21,7 @@ export function similaridadeJaccard(a: string[], b: string[]) {
   const uniao = new Set([...setA, ...setB]);
 
   return {
-    score: Math.round((intersecao.length / uniao.size) * 100),
+    score: (intersecao.length / uniao.size) * 100,
     palavrasComuns: intersecao,
   };
 }
@@ -44,7 +47,7 @@ export function interpretar(score: number) {
   if (score < 60) {
     return {
       nivel: "Semelhança moderada",
-      cor: "yellow",
+      cor: "orange",
       descricao: "Os textos compartilham algumas ideias.",
     };
   }
@@ -52,8 +55,16 @@ export function interpretar(score: number) {
   if (score < 80) {
     return {
       nivel: "Alta semelhança",
-      cor: "orange",
+      cor: "red",
       descricao: "Os textos compartilham muitas palavras ou estruturas.",
+    };
+  }
+
+  if (status === "error") {
+    return {
+      nivel: "Textos muito curtos para comparacão confiável",
+      cor: "red",
+      descricao: "Não foi possível interpretar a similaridade entre os textos.",
     };
   }
 
@@ -72,9 +83,13 @@ export function compararTextos(texto1: string, texto2: string) {
 
   const interpretacao = interpretar(sim.score);
 
+  const score = sim.score;
+  status = isNaN(score) || isNullOrUndef(score) ? "error" : "ok";
+
   return {
-    score: sim.score,
+    score,
     palavrasComuns: sim.palavrasComuns.slice(0, 20),
+    status,
     ...interpretacao,
   };
 }

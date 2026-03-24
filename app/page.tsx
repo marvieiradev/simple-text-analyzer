@@ -15,6 +15,7 @@ export default function Home() {
   const [resultado, setResultado] = useState<any>(null);
   const [similarity, setSimilarity] = useState<any>(null);
   const [elsResultados, setElsResultados] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [color, setColor] = useState({
     bg: "bg-gray-100",
     text: "text-gray-700",
@@ -32,11 +33,6 @@ export default function Home() {
       text: "text-green-600",
       bar: "bg-green-500",
     },
-    yellow: {
-      bg: "bg-yellow-100",
-      text: "text-yellow-600",
-      bar: "bg-yellow-500",
-    },
     orange: {
       bg: "bg-orange-100",
       text: "text-orange-600",
@@ -50,17 +46,23 @@ export default function Home() {
   };
 
   async function analisar(texto: string) {
-    const res = await fetch("/api/analyze", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ texto }),
-    });
-
-    escanearELS(texto);
-    const data = await res.json();
-    setResultado(data);
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/analyze", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ texto }),
+      });
+      escanearELS(texto);
+      const data = await res.json();
+      setResultado(data);
+    } catch (error) {
+      return;
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   async function calibrar(texto: string, tipo: "human" | "ia") {
@@ -79,26 +81,35 @@ export default function Home() {
   }
 
   async function compararTextos(texto1: string, texto2: string) {
-    const res = await fetch("/api/compare", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        texto1,
-        texto2,
-      }),
-    });
-    const data = await res.json();
-    setSimilarity(data);
-    setColor(
-      colorMap[data?.cor] || {
-        bg: "bg-gray-100",
-        text: "text-gray-700",
-        bar: "bg-gray-700",
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/compare", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          texto1,
+          texto2,
+        }),
+      });
+      const data = await res.json();
+      setSimilarity(data);
+      setColor(
+        colorMap[data?.cor] || {
+          bg: "bg-gray-100",
+          text: "text-gray-700",
+          bar: "bg-gray-700",
+        }
+      );
+      if (data) {
+        window.scrollTo(0, document.body.scrollHeight);
       }
-    );
-    window.scrollTo(0, document.body.scrollHeight);
+    } catch (error) {
+      return;
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   async function escanearELS(texto: string) {
@@ -132,26 +143,22 @@ export default function Home() {
   }
 
   return (
-    <div className="w-full max-w-225 mx-auto px-6 flex flex-col gap-8">
-      {/* CONTAINER */}
-
-      <div className="max-w-5xl mx-auto flex flex-col gap-8!">
-        {/* HEADER */}
+    <div className="w-full max-w-225 mx-auto px-6 flex flex-col gap-6!">
+      <div className="max-w-5xl mx-auto flex flex-col gap-4!">
         <header className="flex flex-col text-center space-y-2 mt-3! bg-indigo-500 p-1! rounded-xl gap-2!">
-          <h1 className="text-4xl font-bold text-white">
+          <h1 className="text-2xl font-bold text-white">
             Laboratório de Análise Textual
           </h1>
 
-          <p className="text-slate-50 mb-2!">
+          <p className="text-slate-50 mb-2! font-semibold">
             Detector experimental de padrões e probabilidade de IA
           </p>
         </header>
-        {/* TABS */}
         <div className="flex justify-center mt-2!">
           <div className="bg-white shadow-sm rounded-xl p-1 flex gap-1">
             <button
               onClick={() => setTab("analise")}
-              className={`px-6 py-2 rounded-lg transition font-medium ${
+              className={`px-6 py-2 rounded-lg transition font-medium text-sm ${
                 tab === "analise"
                   ? "bg-indigo-500 text-white shadow"
                   : "text-slate-600 hover:bg-slate-100"
@@ -162,7 +169,7 @@ export default function Home() {
 
             <button
               onClick={() => setTab("comparacao")}
-              className={`px-6 py-2 rounded-lg transition font-medium ${
+              className={`px-6 py-2 rounded-lg transition font-medium text-sm ${
                 tab === "comparacao"
                   ? "bg-indigo-500 text-white shadow"
                   : "text-slate-600 hover:bg-slate-100"
@@ -176,8 +183,19 @@ export default function Home() {
         <div className="flex flex-col w-full py-10 p-10 container">
           {tab === "analise" && (
             <div className="w-full bg-white p-8 rounded-2xl shadow-lg border border-slate-100 flex flex-col overflow-hidden py-6">
+              <div className="bg-slate-100 p-2! mt-2!">
+                <p className="text-center text-base text-slate-500">
+                  Verifique se seu texto foi produzido por IA.{" "}
+                  <span className="font-semibold">
+                    Os resultados não são garantidos,{" "}
+                  </span>
+                  tendo em conta que a IA consegue imitar o estilo humano e
+                  textos humanos muito técnicos podem ser confundidos com textos
+                  produzidos por IA.
+                </p>
+              </div>
               <textarea
-                className="border-2 border-slate-300 rounded-xl min-h-40 focus:ring-2 focus:ring-indigo-400 outline-none p-4 mt-6!"
+                className="border-2 border-slate-300 rounded-xl min-h-40 focus:ring-2 focus:ring-indigo-400 outline-none p-4 mt-4!"
                 placeholder="Cole, escreva ou carregue um texto para análise (max 500.000 caracteres)"
                 value={texto1}
                 maxLength={textLimit}
@@ -213,12 +231,12 @@ export default function Home() {
               <div className="flex justify-center items-center">
                 <button
                   onClick={() => analisar(texto1)}
-                  className={`ml-auto w-50 px-6 py-2 bg-indigo-500 text-white rounded-lg transition shadow-sm ${
+                  className={`ml-auto w-50 px-6 py-2 bg-indigo-500 text-white rounded-lg transition shadow-sm text-base font-semibold ${
                     texto1.length === 0 ? "cursor-not-allowed! opacity-50!" : ""
                   }`}
-                  disabled={texto1.length === 0}
+                  disabled={texto1.length === 0 || isLoading}
                 >
-                  Analisar Texto
+                  {isLoading ? "Analizando ..." : "Analisar Texto"}
                 </button>
               </div>
 
@@ -384,6 +402,14 @@ export default function Home() {
 
           {tab === "comparacao" && (
             <div className="w-full bg-white p-8 rounded-2xl shadow-lg border border-slate-100 flex flex-col overflow-hidden">
+              <div className="bg-slate-100 p-2! mt-2!">
+                <p className="text-center text-base text-slate-500">
+                  Compare dois textos para verificar a similaridade entre eles.{" "}
+                  <span className="font-semibold">
+                    Útil para detectar plágios e cópias.
+                  </span>
+                </p>
+              </div>
               <textarea
                 className="border-2 border-slate-300 rounded-xl p-4 min-h-40"
                 placeholder="Cole, escreva ou carregue um texto para análise (max 500.000 caracteres)"
@@ -457,9 +483,9 @@ export default function Home() {
                   className={`w-50 px-6 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition shadow-sm ${
                     !texto1 || !texto2 ? "cursor-not-allowed! opacity-50!" : ""
                   }`}
-                  disabled={!texto1 || !texto2}
+                  disabled={!texto1 || !texto2 || isLoading}
                 >
-                  Comparar Textos
+                  {isLoading ? "Comparando..." : "Comparar Textos"}
                 </button>
               </div>
 
@@ -470,7 +496,11 @@ export default function Home() {
                   >
                     <p className="font-semibold text-2xl text-center mb-2!">
                       Similaridade dos textos:{" "}
-                      {`${similarity.score.toFixed(0)}%`}
+                      {`${
+                        similarity.status === "ok"
+                          ? similarity.score.toFixed(0) + "%"
+                          : "Erro ao comparar os textos"
+                      }`}
                     </p>
                     <div
                       className={`bg-slate-300 rounded-full h-4 overflow-hidden mb-2!`}
@@ -478,7 +508,9 @@ export default function Home() {
                       <div
                         className={`${color.bar} h-4 rounded-full transition-all duration-500`}
                         style={{
-                          width: `${similarity.score}%`,
+                          width: `${
+                            similarity.status === "ok" ? similarity.score : 0
+                          }%`,
                         }}
                       />
                     </div>

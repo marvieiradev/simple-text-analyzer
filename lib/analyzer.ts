@@ -233,8 +233,10 @@ export function extrairMetricas(texto: string) {
     visual = { phase: "Provavelmente IA", color: "red" };
   } else if (scoreFinal <= 70 && scoreFinal > 40) {
     visual = { phase: "Indeterminado / Híbrido", color: "orange" };
-  } else if (scoreFinal <= 40) {
-    visual = { phase: "Provavelmente Humano", color: "green" };
+  } else if (scoreFinal <= 40 && scoreFinal > 20) {
+    visual = { phase: "Provavelmente Humano", color: "blue" };
+  } else if (scoreFinal <= 20) {
+    visual = { phase: "Humano", color: "green" };
   } else if (status === "error") {
     visual = {
       phase: "Texto muito curto para análise confiável.",
