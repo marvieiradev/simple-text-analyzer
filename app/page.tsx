@@ -244,7 +244,7 @@ export default function Home() {
                 <div className="flex flex-col gap-8 pt-4! items-center">
                   {/* PROBABILIDADE IA */}
 
-                  <div className="space-y-2 w-[95%] justify-center mb-8!">
+                  <div className="space-y-2 w-[95%] justify-center">
                     <p className="text-xl font-bold text-slate-500 text-center mb-4!">
                       Resultado:{" "}
                       <span
@@ -294,6 +294,17 @@ export default function Home() {
                               resultado.metricas.entropiaCaracteres.toFixed(2)
                             )}
                           </p>
+                          <div className="mt-2! bg-gray-100">
+                            <p className="text-sm text-slate-600 md:min-h-35">
+                              Entropia de Caracteres mede o nível de variação
+                              entre as letras do texto. Quanto maior, mais
+                              diverso e menos repetitivo ele é.{" "}
+                              <span className="font-semibold">
+                                Um valor acima de 4.5, geralmente é alcançado
+                                por textos IA.
+                              </span>
+                            </p>
+                          </div>
                         </div>
 
                         <div className="bg-slate-50 p-5 rounded-xl border border-slate-100 gap-2">
@@ -306,6 +317,17 @@ export default function Home() {
                               resultado.metricas.entropiaPalavras.toFixed(2)
                             )}
                           </p>
+                          <div className="mt-2! bg-gray-100">
+                            <p className="text-sm text-slate-600 md:min-h-35">
+                              Entropia de Palavras Avalia a variedade das
+                              palavras usadas. Textos com maior entropia tendem
+                              a ser mais ricos e menos previsíveis.{" "}
+                              <span className="font-semibold">
+                                Textos humanos geralmete mostram resultados
+                                abaixo de 3.5.
+                              </span>
+                            </p>
+                          </div>
                         </div>
 
                         <div className="bg-slate-50 p-5 rounded-xl border border-slate-100 gap-2">
@@ -318,7 +340,25 @@ export default function Home() {
                               resultado.metricas.diversidadeLexica.toFixed(2)
                             )}
                           </p>
+                          <div className="mt-2! bg-gray-100 md:min-h-35">
+                            <p className="text-sm text-slate-600">
+                              Diversidade Lexical indica quantas palavras
+                              diferentes existem em relação ao total. Quanto
+                              maior, mais variado é o vocabulário.{" "}
+                              <span className="font-semibold">
+                                IA constuma ter um vocabulário mais variado,
+                                costumam pontuar acima de 0,7.
+                              </span>
+                            </p>
+                          </div>
                         </div>
+                      </div>
+
+                      <div className="p-4! bg-gray-100">
+                        <p className="text-base font-semibold text-slate-600 text-center">
+                          Esses valores são estimativas e podem variar
+                          dependendo do tipo e tamanho do texto.
+                        </p>
                       </div>
 
                       {/* GRAFICO */}
@@ -327,6 +367,14 @@ export default function Home() {
                         <h4 className="font-semibold text-slate-500 mb-4">
                           Frequência de Palavras
                         </h4>
+
+                        <div className="mt-4! py-2! bg-gray-100">
+                          <p className="text-sm text-slate-600">
+                            Mostra quais palavras aparecem com mais frequência
+                            no texto, ajudando a identificar repetições e
+                            padrões.
+                          </p>
+                        </div>
 
                         <div className="w-full h-75 overflow-hidden">
                           <Bar
@@ -358,6 +406,13 @@ export default function Home() {
                         <p className="text-base text-slate-500 mb-4 font-semibold">
                           ELS Detectados
                         </p>
+                        <div className="mt-4! py-2! bg-gray-100 ">
+                          <p className="text-sm text-slate-600">
+                            Identifica padrões escondidos no texto, como
+                            sequências de letras que podem indicar estruturas
+                            repetitivas ou artificiais.
+                          </p>
+                        </div>
 
                         {elsResultados.length > 0 && (
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
