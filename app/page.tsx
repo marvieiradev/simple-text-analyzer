@@ -183,7 +183,7 @@ export default function Home() {
         <div className="flex flex-col w-full py-10 p-10 container">
           {tab === "analise" && (
             <div className="w-full bg-white p-8 rounded-2xl shadow-lg border border-slate-100 flex flex-col overflow-hidden py-6">
-              <div className="bg-slate-100 p-2! mt-2!">
+              <div className="mt-2! p-4!">
                 <p className="text-center text-base text-slate-500">
                   Verifique se seu texto foi produzido por IA.{" "}
                   <span className="font-semibold">
