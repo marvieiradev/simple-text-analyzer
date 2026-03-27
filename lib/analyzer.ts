@@ -11,6 +11,8 @@ export function extrairMetricas(texto: string) {
 
   const textoLower = texto.toLowerCase();
 
+  const fatorTamanho = Math.min(palavras.length / 1000, 1);
+
   // MÉTRICAS BASE
 
   const burst = burstiness(frases); // variação entre frases
@@ -93,7 +95,9 @@ export function extrairMetricas(texto: string) {
 
   // CONECTIVOS NORMALIZADOS
 
-  const taxaIA = contarOcorrencias(textoLower, conectivosIA) / totalPalavras;
+  const taxaIA = Math.sqrt(
+    contarOcorrencias(textoLower, conectivosIA) / totalPalavras
+  );
 
   const taxaHumano =
     contarOcorrencias(textoLower, conectivosHumanos) / totalPalavras;
@@ -108,6 +112,7 @@ export function extrairMetricas(texto: string) {
 
   // ===== IA =====
 
+  scoreIA *= 1 - fatorTamanho * 0.2;
   scoreIA += (1 - burst) * 40;
   scoreIA += previs * 40;
   scoreIA += repBigram * 60;
@@ -168,6 +173,7 @@ export function extrairMetricas(texto: string) {
   if (taxaHumano > 0.02) scoreHumano += taxaHumano * 200;
   if (taxaSubjetivo > 0.015) scoreHumano += taxaSubjetivo * 200;
   if (taxaSubjetivo > 0.01) scoreHumano += 50;
+  if (varianciaFrases < 40 && diversidadeLexica > 0.4) scoreHumano += 10;
 
   const tamanhos = frases.map((f) => f.split(/\s+/).length);
   const max = Math.max(...tamanhos);
@@ -199,6 +205,22 @@ export function extrairMetricas(texto: string) {
 
   if (repBigram > 0.4 && diversidadeLexica < 0.3) {
     scoreHumano += 20;
+  }
+
+  // Verificação e correção para textos técnicos
+  const textoTecnico =
+    taxaIA > 0.01 &&
+    entropiaPalavras > 5 &&
+    diversidadeLexica < 0.3 &&
+    taxaSubjetivo < 0.01;
+
+  if (textoTecnico) {
+    scoreIA = Math.min(scoreIA, 50);
+    scoreHumano += 25;
+  }
+
+  if (palavras.length > 300 && textoTecnico) {
+    scoreIA = Math.min(scoreIA, 50);
   }
 
   // RESULTADO FINAL
@@ -258,6 +280,13 @@ export function extrairMetricas(texto: string) {
     dominancia,
     frequencia: frequenciaPalavras(texto),
   });*/
+
+  console.log("Taxa IA:", taxaIA);
+  console.log("Diversidade lexica:", diversidadeLexica);
+  console.log("Entropia Palavas:", entropiaPalavras);
+  console.log("Taxa Subjetivo:", taxaSubjetivo);
+
+  console.log("textoTecnico:", textoTecnico);
 
   // RETURN
 
