@@ -105,6 +105,15 @@ export function extrairMetricas(texto: string) {
   const taxaSubjetivo =
     contarOcorrencias(textoLower, subjetivos) / totalPalavras;
 
+  // CLASSIFICAÇÃO DE TIPO DE TEXTO
+  const tipoTexto = classificarTipoTexto({
+    taxaIA,
+    taxaSubjetivo,
+    diversidadeLexica,
+    entropiaPalavras,
+    palavras,
+  });
+
   // SCORE
 
   let scoreIA = 0;
@@ -223,6 +232,21 @@ export function extrairMetricas(texto: string) {
     scoreIA = Math.min(scoreIA, 50);
   }
 
+  // Ajustes para textos religiosos, tecnicos ou opinativos
+
+  if (tipoTexto === "religioso") {
+    scoreIA = Math.min(scoreIA, 60);
+    scoreHumano += 25;
+  }
+
+  if (tipoTexto === "tecnico") {
+    scoreIA = Math.min(scoreIA, 70);
+  }
+
+  if (tipoTexto === "opinativo") {
+    scoreHumano += 20;
+  }
+
   // RESULTADO FINAL
 
   let totalScore = scoreIA + scoreHumano;
@@ -285,8 +309,8 @@ export function extrairMetricas(texto: string) {
   console.log("Diversidade lexica:", diversidadeLexica);
   console.log("Entropia Palavas:", entropiaPalavras);
   console.log("Taxa Subjetivo:", taxaSubjetivo);
-
   console.log("textoTecnico:", textoTecnico);
+  console.log("Tipo de texto:", tipoTexto);
 
   // RETURN
 
@@ -506,4 +530,49 @@ function repeticaoNGrams(ngrams: string[]) {
   });
 
   return repetidos / ngrams.length;
+}
+
+function classificarTipoTexto({
+  taxaConectivosIA,
+  taxaSubjetivo,
+  diversidadeLexica,
+  entropiaPalavras,
+  palavras,
+}: any) {
+  const tamanho = palavras.length;
+
+  // RELIGIOSO / FORMAL MASSIVO (Bíblia, Alcorão, etc)
+  if (
+    tamanho > 300 &&
+    taxaSubjetivo < 0.01 &&
+    diversidadeLexica < 0.3 &&
+    entropiaPalavras > 5
+  ) {
+    return "religioso";
+  }
+
+  // TÉCNICO / ACADÊMICO
+  if (
+    taxaConectivosIA > 0.02 &&
+    diversidadeLexica > 0.35 &&
+    taxaSubjetivo < 0.015
+  ) {
+    return "tecnico";
+  }
+
+  // OPINATIVO / HUMANO REFLEXIVO
+  if (taxaSubjetivo > 0.02) {
+    return "opinativo";
+  }
+
+  // NARRATIVO (história, conversa)
+  if (
+    diversidadeLexica > 0.4 &&
+    entropiaPalavras < 4.5 &&
+    taxaSubjetivo > 0.01
+  ) {
+    return "narrativo";
+  }
+
+  return "neutro";
 }
