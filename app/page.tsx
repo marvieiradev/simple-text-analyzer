@@ -3,7 +3,11 @@
 import { useState } from "react";
 import { Bar } from "react-chartjs-2";
 import "chart.js/auto";
-import { ArrowBigUp } from "lucide-react";
+import { Header } from "./components/Header";
+import { TabSwitcher } from "./components/TabSwitcher";
+import { Button } from "./components/Button";
+import { TextAreaInput } from "./components/TextAreaInput";
+import { FileUpload } from "./components/FileUpload";
 
 export default function Home() {
   const textLimit = 500000;
@@ -145,40 +149,8 @@ export default function Home() {
   return (
     <div className="w-full max-w-225 mx-auto px-6 flex flex-col gap-6!">
       <div className="max-w-5xl mx-auto flex flex-col gap-4!">
-        <header className="flex flex-col text-center space-y-2 mt-3! bg-indigo-500 p-1! rounded-xl gap-2!">
-          <h1 className="text-2xl font-bold text-white">
-            Laboratório de Análise Textual
-          </h1>
-
-          <p className="text-slate-50 mb-2! font-semibold">
-            Detector experimental de padrões e probabilidade de IA
-          </p>
-        </header>
-        <div className="flex justify-center mt-2!">
-          <div className="bg-white shadow-sm rounded-xl p-1 flex gap-1">
-            <button
-              onClick={() => setTab("analise")}
-              className={`px-6 py-2 rounded-lg transition font-medium text-sm ${
-                tab === "analise"
-                  ? "bg-indigo-500 text-white shadow"
-                  : "text-slate-600 hover:bg-slate-100"
-              }`}
-            >
-              Análise
-            </button>
-
-            <button
-              onClick={() => setTab("comparacao")}
-              className={`px-6 py-2 rounded-lg transition font-medium text-sm ${
-                tab === "comparacao"
-                  ? "bg-indigo-500 text-white shadow"
-                  : "text-slate-600 hover:bg-slate-100"
-              }`}
-            >
-              Comparação
-            </button>
-          </div>
-        </div>
+        <Header />
+        <TabSwitcher tab={tab} setTab={setTab} />
         {/* ANALISE */}
         <div className="flex flex-col w-full py-10 p-10 container">
           {tab === "analise" && (
@@ -194,6 +166,20 @@ export default function Home() {
                   produzidos por IA.
                 </p>
               </div>
+
+              <TextAreaInput
+                value={texto1}
+                onChange={setTexto1}
+                maxLength={textLimit}
+              />
+
+              <FileUpload
+                onLoadText={setTexto1}
+                fileName={fileName1}
+                setFileName={setFileName1}
+              />
+
+              {/*
               <textarea
                 className="border-2 border-slate-300 rounded-xl min-h-40 focus:ring-2 focus:ring-indigo-400 outline-none p-4 mt-4!"
                 placeholder="Cole, escreva ou carregue um texto para análise (max 500.000 caracteres)"
@@ -227,17 +213,16 @@ export default function Home() {
                   {texto1.length}/{textLimit}
                 </p>
               </div>
+              */}
 
               <div className="flex justify-center items-center">
-                <button
+                <Button
                   onClick={() => analisar(texto1)}
-                  className={`ml-auto w-50 px-6 py-2 bg-indigo-500 text-white rounded-lg transition shadow-sm text-base font-semibold ${
-                    texto1.length === 0 ? "cursor-not-allowed! opacity-50!" : ""
-                  }`}
-                  disabled={texto1.length === 0 || isLoading}
+                  disabled={!texto1}
+                  loading={isLoading}
                 >
-                  {isLoading ? "Analizando ..." : "Analisar Texto"}
-                </button>
+                  Analisar
+                </Button>
               </div>
 
               {resultado && (
@@ -465,83 +450,46 @@ export default function Home() {
                   </span>
                 </p>
               </div>
-              <textarea
-                className="border-2 border-slate-300 rounded-xl p-4 min-h-40"
-                placeholder="Cole, escreva ou carregue um texto para análise (max 500.000 caracteres)"
-                value={texto1}
-                maxLength={textLimit}
-                onChange={(e) => setTexto1(e.target.value)}
-              />
 
-              <div className="flex justify-between mb-4! px-2!">
-                <div className="flex items-center gap-4 ">
-                  <label
-                    htmlFor="text1"
-                    className="text-sm font-semibold rounded-full text-white bg-emerald-400"
-                  >
-                    <ArrowBigUp />
-                    Selecionar Texto
-                  </label>
-                  <input
-                    type="file"
-                    id="text1"
-                    accept=".txt"
-                    onChange={(e) => uploadArquivo(e, setTexto1, "fileName1")}
+              <div>
+                <div>
+                  <TextAreaInput
+                    value={texto1}
+                    onChange={setTexto1}
+                    maxLength={textLimit}
                   />
-                  <span className="text-md text-slate-500 font-semibold">
-                    {texto1 ? fileName1 : ""}
-                  </span>
-                </div>
-                <p className="text-slate-500 -mt-2!">
-                  {texto1.length}/{textLimit}
-                </p>
-              </div>
 
-              <textarea
-                className="border-2 border-slate-300 rounded-xl p-4 min-h-40"
-                placeholder="Cole, escreva ou carregue um texto para análise (max 500.000 caracteres)"
-                value={texto2}
-                maxLength={textLimit}
-                onChange={(e) => setTexto2(e.target.value)}
-              />
-
-              <div className="flex justify-between mb-4! px-2!">
-                <div className="flex items-center gap-4">
-                  <label
-                    htmlFor="text2"
-                    className="text-sm font-semibold rounded-full text-white bg-emerald-400"
-                  >
-                    <ArrowBigUp />
-                    Selecionar Texto
-                  </label>
-                  <input
-                    type="file"
-                    id="text2"
-                    accept=".txt"
-                    onChange={(e) => uploadArquivo(e, setTexto2, "fileName2")}
+                  <FileUpload
+                    id="file1"
+                    onLoadText={setTexto1}
+                    fileName={fileName1}
+                    setFileName={setFileName1}
                   />
-                  <span className="text-md text-slate-500 font-semibold">
-                    {texto2 ? fileName2 : ""}
-                  </span>
                 </div>
-                <p className="text-slate-500 -mt-2!">
-                  {texto2.length}/{textLimit}
-                </p>
+                <div className="mt-6!">
+                  <TextAreaInput
+                    value={texto2}
+                    onChange={setTexto2}
+                    maxLength={textLimit}
+                  />
+
+                  <FileUpload
+                    id="file2"
+                    onLoadText={setTexto2}
+                    fileName={fileName2}
+                    setFileName={setFileName2}
+                  />
+                </div>
               </div>
 
               <div className="w-full flex justify-center items-center mb-4!">
-                <button
-                  onClick={() => {
-                    if (!texto1 || !texto2) return;
-                    compararTextos(texto1, texto2);
-                  }}
-                  className={`w-50 px-6 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition shadow-sm ${
-                    !texto1 || !texto2 ? "cursor-not-allowed! opacity-50!" : ""
-                  }`}
-                  disabled={!texto1 || !texto2 || isLoading}
+                <Button
+                  onClick={() => compararTextos(texto1, texto2)}
+                  disabled={!texto1 || !texto2}
+                  loading={isLoading}
                 >
-                  {isLoading ? "Comparando..." : "Comparar Textos"}
-                </button>
+                  Comparar
+                </Button>
               </div>
 
               <div className="w-full mb-4! flex justify-center items-center">
