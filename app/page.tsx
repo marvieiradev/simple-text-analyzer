@@ -179,42 +179,6 @@ export default function Home() {
                 setFileName={setFileName1}
               />
 
-              {/*
-              <textarea
-                className="border-2 border-slate-300 rounded-xl min-h-40 focus:ring-2 focus:ring-indigo-400 outline-none p-4 mt-4!"
-                placeholder="Cole, escreva ou carregue um texto para análise (max 500.000 caracteres)"
-                value={texto1}
-                maxLength={textLimit}
-                onChange={(e) => setTexto1(e.target.value)}
-              />
-
-              <div className="flex justify-between mb-4! px-2!">
-                <div className="flex items-center gap-3">
-                  <label
-                    htmlFor="text"
-                    className="text-sm font-semibold rounded-full text-white bg-emerald-400"
-                  >
-                    <ArrowBigUp />
-                    Selecionar Texto
-                  </label>
-
-                  <input
-                    type="file"
-                    id="text"
-                    accept=".txt"
-                    onChange={(e) => uploadArquivo(e, setTexto1, "fileName1")}
-                    className="text-sm"
-                  />
-                  <span className="text-md text-slate-500 font-semibold">
-                    {texto1 ? fileName1 : ""}
-                  </span>
-                </div>
-                <p className="text-slate-500 -mt-2!">
-                  {texto1.length}/{textLimit}
-                </p>
-              </div>
-              */}
-
               <div className="flex justify-center items-center">
                 <Button
                   onClick={() => analisar(texto1)}
@@ -279,7 +243,7 @@ export default function Home() {
                               resultado.metricas.entropiaCaracteres.toFixed(2)
                             )}
                           </p>
-                          <div className="mt-2! bg-gray-100">
+                          <div className="mt-2!">
                             <p className="text-sm text-slate-600 md:min-h-35">
                               Entropia de Caracteres mede o nível de variação
                               entre as letras do texto. Quanto maior, mais
@@ -302,7 +266,7 @@ export default function Home() {
                               resultado.metricas.entropiaPalavras.toFixed(2)
                             )}
                           </p>
-                          <div className="mt-2! bg-gray-100">
+                          <div className="mt-2!">
                             <p className="text-sm text-slate-600 md:min-h-35">
                               Entropia de Palavras Avalia a variedade das
                               palavras usadas. Textos com maior entropia tendem
@@ -325,7 +289,7 @@ export default function Home() {
                               resultado.metricas.diversidadeLexica.toFixed(2)
                             )}
                           </p>
-                          <div className="mt-2! bg-gray-100 md:min-h-35">
+                          <div className="mt-2! md:min-h-35">
                             <p className="text-sm text-slate-600">
                               Diversidade Lexical indica quantas palavras
                               diferentes existem em relação ao total. Quanto
@@ -339,7 +303,7 @@ export default function Home() {
                         </div>
                       </div>
 
-                      <div className="p-4! bg-gray-100">
+                      <div className="p-4!">
                         <p className="text-base font-semibold text-slate-600 text-center">
                           Esses valores são estimativas e podem variar
                           dependendo do tipo e tamanho do texto.
@@ -353,7 +317,7 @@ export default function Home() {
                           Frequência de Palavras
                         </h4>
 
-                        <div className="mt-4! py-2! bg-gray-100">
+                        <div className="mt-4! py-2!">
                           <p className="text-sm text-slate-600">
                             Mostra quais palavras aparecem com mais frequência
                             no texto, ajudando a identificar repetições e
@@ -391,7 +355,7 @@ export default function Home() {
                         <p className="text-base text-slate-500 mb-4 font-semibold">
                           ELS Detectados
                         </p>
-                        <div className="mt-4! py-2! bg-gray-100 ">
+                        <div className="mt-4! py-2!">
                           <p className="text-sm text-slate-600">
                             Identifica padrões escondidos no texto, como
                             sequências de letras que podem indicar estruturas
@@ -442,7 +406,7 @@ export default function Home() {
 
           {tab === "comparacao" && (
             <div className="w-full bg-white p-8 rounded-2xl shadow-lg border border-slate-100 flex flex-col overflow-hidden">
-              <div className="bg-slate-100 p-2! mt-2!">
+              <div className=" p-2! mt-2!">
                 <p className="text-center text-base text-slate-500">
                   Compare dois textos para verificar a similaridade entre eles.{" "}
                   <span className="font-semibold">
