@@ -233,7 +233,7 @@ export default function Home() {
                   {resultado.metricas.status === "ok" && (
                     <>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-[95%]">
-                        <div className="bg-slate-50 p-5 rounded-xl border border-slate-100 gap-2">
+                        <div className="bg-slate-50 !p-2 rounded-xl border border-slate-100 gap-2">
                           <p className="text-base text-slate-500 font-semibold">
                             Entropia de Caracteres
                           </p>
@@ -256,7 +256,7 @@ export default function Home() {
                           </div>
                         </div>
 
-                        <div className="bg-slate-50 p-5 rounded-xl border border-slate-100 gap-2">
+                        <div className="bg-slate-50 !p-2 rounded-xl border border-slate-100 gap-2">
                           <p className="text-base text-slate-500 font-semibold">
                             Entropia de Palavras
                           </p>
@@ -272,14 +272,14 @@ export default function Home() {
                               palavras usadas. Textos com maior entropia tendem
                               a ser mais ricos e menos previsíveis.{" "}
                               <span className="font-semibold">
-                                Textos humanos geralmete mostram resultados
+                                Textos humanos geralmente mostram resultados
                                 abaixo de 3.5.
                               </span>
                             </p>
                           </div>
                         </div>
 
-                        <div className="bg-slate-50 p-5 rounded-xl border border-slate-100 gap-2">
+                        <div className="bg-slate-50 !p-2 rounded-xl border border-slate-100 gap-2">
                           <p className="text-base text-slate-500 font-semibold">
                             Diversidade Lexical
                           </p>
@@ -296,7 +296,7 @@ export default function Home() {
                               maior, mais variado é o vocabulário.{" "}
                               <span className="font-semibold">
                                 IA constuma ter um vocabulário mais variado,
-                                costumam pontuar acima de 0,7.
+                                costumam pontuar acima de 0.7.
                               </span>
                             </p>
                           </div>
