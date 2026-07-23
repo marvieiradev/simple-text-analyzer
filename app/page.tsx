@@ -20,6 +20,7 @@ export default function Home() {
   const [similarity, setSimilarity] = useState<any>(null);
   const [elsResultados, setElsResultados] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showMore, setShowMore] = useState(false);
   const [color, setColor] = useState({
     bg: "bg-gray-100",
     text: "text-gray-700",
@@ -104,7 +105,7 @@ export default function Home() {
           bg: "bg-gray-100",
           text: "text-gray-700",
           bar: "bg-gray-700",
-        }
+        },
       );
       if (data) {
         window.scrollTo(0, document.body.scrollHeight);
@@ -240,7 +241,7 @@ export default function Home() {
 
                           <p className="text-2xl font-bold text-slate-700">
                             {Number(
-                              resultado.metricas.entropiaCaracteres.toFixed(2)
+                              resultado.metricas.entropiaCaracteres.toFixed(2),
                             )}
                           </p>
                           <div className="mt-2!">
@@ -263,7 +264,7 @@ export default function Home() {
 
                           <p className="text-2xl font-bold text-slate-700">
                             {Number(
-                              resultado.metricas.entropiaPalavras.toFixed(2)
+                              resultado.metricas.entropiaPalavras.toFixed(2),
                             )}
                           </p>
                           <div className="mt-2!">
@@ -286,7 +287,7 @@ export default function Home() {
 
                           <p className="text-2xl font-bold text-slate-700">
                             {Number(
-                              resultado.metricas.diversidadeLexica.toFixed(2)
+                              resultado.metricas.diversidadeLexica.toFixed(2),
                             )}
                           </p>
                           <div className="mt-2! md:min-h-35">
@@ -310,91 +311,95 @@ export default function Home() {
                         </p>
                       </div>
 
-                      {/* GRAFICO */}
+                      {showMore ? (
+                        <>
+                          {/* GRAFICO */}
+                          <div className="bg-white border border-slate-100 p-6 rounded-xl w-[95%]">
+                            <h4 className="font-semibold text-slate-500 mb-4">
+                              Frequência de Palavras
+                            </h4>
 
-                      <div className="bg-white border border-slate-100 p-6 rounded-xl w-[95%]">
-                        <h4 className="font-semibold text-slate-500 mb-4">
-                          Frequência de Palavras
-                        </h4>
+                            <div className="mt-4! py-2!">
+                              <p className="text-sm text-slate-600">
+                                Mostra quais palavras aparecem com mais
+                                frequência no texto, ajudando a identificar
+                                repetições e padrões.
+                              </p>
+                            </div>
 
-                        <div className="mt-4! py-2!">
-                          <p className="text-sm text-slate-600">
-                            Mostra quais palavras aparecem com mais frequência
-                            no texto, ajudando a identificar repetições e
-                            padrões.
-                          </p>
-                        </div>
-
-                        <div className="w-full h-75 overflow-hidden">
-                          <Bar
-                            options={{
-                              responsive: true,
-                              maintainAspectRatio: false,
-                            }}
-                            data={{
-                              labels: Object.keys(
-                                resultado.metricas.frequencia
-                              ),
-                              datasets: [
-                                {
-                                  label: "Frequência",
-                                  data: Object.values(
-                                    resultado.metricas.frequencia
+                            <div className="w-full h-75 overflow-hidden">
+                              <Bar
+                                options={{
+                                  responsive: true,
+                                  maintainAspectRatio: false,
+                                }}
+                                data={{
+                                  labels: Object.keys(
+                                    resultado.metricas.frequencia,
                                   ),
-                                  backgroundColor: "#6366f1",
-                                },
-                              ],
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* ELS */}
-
-                      <div className="bg-slate-50 p-5 rounded-xl border border-slate-100 w-[95%] gap-2 mb-6!">
-                        <p className="text-base text-slate-500 mb-4 font-semibold">
-                          ELS Detectados
-                        </p>
-                        <div className="mt-4! py-2!">
-                          <p className="text-sm text-slate-600">
-                            Identifica padrões escondidos no texto, como
-                            sequências de letras que podem indicar estruturas
-                            repetitivas ou artificiais.
-                          </p>
-                        </div>
-
-                        {elsResultados.length > 0 && (
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                            {elsResultados.map((r, i) => (
-                              <div
-                                key={i}
-                                style={{ marginTop: "10px" }}
-                                className="p-4 mt-4"
-                              >
-                                <div className="flex gap-2 pb-2 text-slate-700">
-                                  <span>
-                                    <b>Salto:</b> {r.salto}
-                                  </span>
-                                  <span>
-                                    <b>Tamanho:</b> {r.tamanho}
-                                  </span>
-                                </div>
-
-                                <div
-                                  className="bg-gray-200 text-slate-900 overflow-x-auto whitespace-pre-wrap min-h-25"
-                                  style={{
-                                    padding: "10px",
-                                    marginTop: "10px",
-                                    fontFamily: "monospace",
-                                  }}
-                                >
-                                  {r.texto}
-                                </div>
-                              </div>
-                            ))}
+                                  datasets: [
+                                    {
+                                      label: "Frequência",
+                                      data: Object.values(
+                                        resultado.metricas.frequencia,
+                                      ),
+                                      backgroundColor: "#6366f1",
+                                    },
+                                  ],
+                                }}
+                              />
+                            </div>
                           </div>
-                        )}
-                      </div>
+
+                          {/* ELS */}
+                          <div className="bg-slate-50 p-5 rounded-xl border border-slate-100 w-[95%] gap-2 mb-6!">
+                            <p className="text-base text-slate-500 mb-4 font-semibold">
+                              ELS Detectados
+                            </p>
+                            <div className="mt-4! py-2!">
+                              <p className="text-sm text-slate-600">
+                                Identifica padrões escondidos no texto, como
+                                sequências de letras que podem indicar
+                                estruturas repetitivas ou artificiais.
+                              </p>
+                            </div>
+
+                            {elsResultados.length > 0 && (
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                {elsResultados.map((r, i) => (
+                                  <div
+                                    key={i}
+                                    style={{ marginTop: "10px" }}
+                                    className="p-4 mt-4"
+                                  >
+                                    <div className="flex gap-2 pb-2 text-slate-700">
+                                      <span>
+                                        <b>Salto:</b> {r.salto}
+                                      </span>
+                                      <span>
+                                        <b>Tamanho:</b> {r.tamanho}
+                                      </span>
+                                    </div>
+
+                                    <div
+                                      className="bg-gray-200 text-slate-900 overflow-x-auto whitespace-pre-wrap min-h-25"
+                                      style={{
+                                        padding: "10px",
+                                        marginTop: "10px",
+                                        fontFamily: "monospace",
+                                      }}
+                                    >
+                                      {r.texto}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      ) : (
+                        <button className="cursor-pointer bg-gray-200 p-1 rounded-lg" onClick={() => setShowMore(true)}>Mostrar mais métricas</button>
+                      )}
                     </>
                   )}
                 </div>
