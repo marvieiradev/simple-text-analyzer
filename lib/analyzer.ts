@@ -291,26 +291,14 @@ export function extrairMetricas(texto: string) {
   }
 
   // DEBUG
-  /*console.log({
-    scoreIA,
-    scoreHumano,
-    previs,
-    burst,
-    repBigram,
-    repTrigram,
-    diversidadeLexica,
-    taxaIA,
-    taxaHumano,
-    dominancia,
-    frequencia: frequenciaPalavras(texto),
-  });*/
-
+  /*
   console.log("Taxa IA:", taxaIA);
   console.log("Diversidade lexica:", diversidadeLexica);
   console.log("Entropia Palavas:", entropiaPalavras);
   console.log("Taxa Subjetivo:", taxaSubjetivo);
   console.log("textoTecnico:", textoTecnico);
   console.log("Tipo de texto:", tipoTexto);
+  */
 
   // RETURN
 
